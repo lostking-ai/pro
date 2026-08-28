@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apex Studio — Web Engineering & Memberships</title>
+  <style>
+    :root {
+      --bg: #08090c;
+      --card-bg: rgba(18, 22, 31, 0.85);
+      --border: rgba(255, 255, 255, 0.1);
+      --accent-pro: #3b82f6;
+      --accent-pro-plus: #8b5cf6;
+      --accent-white: #f43f5e;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Background Glow */
+    .glow-bg {
+      position: fixed;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 1000px; height: 600px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 80px 20px; }
+
+    /* Header & Hero */
+    header { text-align: center; margin-bottom: 60px; }
+    .badge {
+      display: inline-block;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      color: #a78bfa;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+    }
+    h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 20px;
+      color: #ffffff;
+    }
+    header p { font-size: 1.25rem; color: var(--text-muted); max-width: 650px; margin: 0 auto; }
+
+    /* Interactive Billing Toggle */
+    .toggle-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 50px;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px; height: 32px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #1f2937;
+      transition: .4s;
+      border-radius: 34px;
+      border: 1px solid var(--border);
+    }
+    .slider:before {
+      position: absolute; content: "";
+      height: 24px; width: 24px;
+      left: 3px; bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider { background-color: var(--accent-pro-plus); }
+    input:checked + .slider:before { transform: translateX(28px); }
+
+    /* Membership Cards Grid */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-bottom: 80px;
+    }
+    .price-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 30px;
+      position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .price-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+    .price-card.featured {
+      border-color: var(--accent-pro-plus);
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.2);
+    }
+    .popular-tag {
+      position: absolute;
+      top: -14px; left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent-pro-plus);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 12px;
+      text-transform: uppercase;
+    }
+    .tier-name { font-size: 1.5rem; font-weight: 700; margin-bottom: 10px; }
+    .price { font-size: 2.8rem; font-weight: 800; margin-bottom: 20px; color: #ffffff; }
+    .price span { font-size: 1rem; color: var(--text-muted); font-weight: 400; }
+    
+    .features-list { list-style: none; margin-bottom: 30px; }
+    .features-list li {
+      margin-bottom: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .features-list li::before { content: "✓"; color: #10b981; font-weight: bold; }
+
+    .btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-pro { background: var(--accent-pro); color: white; }
+    .btn-pro-plus { background: var(--accent-pro-plus); color: white; }
+    .btn-white { background: linear-gradient(90deg, #f43f5e, #fb7185); color: white; }
+    .btn:hover { opacity: 0.9; transform: scale(1.02); }
+
+    /* Interactive Estimator Tool */
+    .calculator {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px;
+      margin-top: 40px;
+    }
+    .calculator h2 { margin-bottom: 10px; font-size: 2rem; color: #ffffff; }
+    .calculator p { color: var(--text-muted); margin-bottom: 30px; }
+    .calc-option {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .calc-option input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
+    .total-display {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-top: 25px;
+      color: var(--accent-pro-plus);
+      text-align: right;
+    }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 2.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="glow-bg"></div>
+
+  <div class="container">
+    <header>
+      <span class="badge">Next-Gen Web Engineering</span>
+      <h1>Web Development Memberships</h1>
+      <p>Subscribe to dedicated engineering power for your business. Unlimited revisions, constant updates, zero downtime.</p>
+    </header>
+
+    <div class="toggle-container">
+      <span>Monthly Billing</span>
+      <label class="switch">
+        <input type="checkbox" id="billingToggle">
+        <span class="slider"></span>
+      </label>
+      <span>Yearly Billing <strong style="color: #10b981;">(Save 20%)</strong></span>
+    </div>
+
+    <div class="pricing-grid">
+      
+      <div class="price-card">
+        <div>
+          <div class="tier-name" style="color: var(--accent-pro);">PRO</div>
+          <div class="price" id="price-pro">$1,499<span>/mo</span></div>
+          <ul class="features-list">
+            <li>1 Request at a time</li>
+            <li>Standard Turnaround (48h)</li>
+            <li>Custom Web Design & HTML/CSS</li>
+            <li>SEO & Speed Optimization</li>
+            <li>Pause or cancel anytime</li>
+          </ul>
+        </div>
+        <button class="btn btn-pro">Subscribe to Pro</button>
+      </div>
+
+      <div class="price-card featured">
+        <div class="popular-tag">Most Popular</div>
+        <div>
+          <div class="tier-name" style="color: var(--accent-pro-plus);">PRO+</div>
+          <div class="price" id="price-proplus">$2,999<span>/mo</span></div>
+          <ul class="features-list">
+            <li>2 Requests at a time</li>
+            <li>Priority Turnaround (24h)</li>
+            <li>Full-Stack Web App Development</li>
+            <li>CMS / E-Commerce Integration</li>
+            <li>Dedicated Slack Channel Support</li>
+          </ul>
+        </div>
+        <button class="btn btn-pro-plus">Subscribe to Pro+</button>
+      </div>
+
+      <div class="price-card">
+        <div>
+          <div class="tier-name" style="color: var(--accent-white);">WHITE</div>
+          <div class="price" id="price-white">$5,499<span>/mo</span></div>
+          <ul class="features-list">
+            <li>Unlimited Active Requests</li>
+            <li>Instant Same-Day Turnaround</li>
+            <li>Custom Native APIs & Microservices</li>
+            <li>White-Label Agency Operations</li>
+            <li>24/7 Dedicated Developer On-Call</li>
+          </ul>
+        </div>
+        <button class="btn btn-white">Subscribe to White</button>
+      </div>
+
+    </div>
+
+    <div class="calculator">
+      <h2>Project Estimator</h2>
+      <p>Need a one-time project instead? Select your requirements to estimate your build cost live:</p>
+      
+      <div class="calc-option">
+        <span>Custom Landing Page Design & Setup</span>
+        <input type="checkbox" class="calc-check" value="800">
+      </div>
+      <div class="calc-option">
+        <span>E-Commerce System Setup</span>
+        <input type="checkbox" class="calc-check" value="1500">
+      </div>
+      <div class="calc-option">
+        <span>Database & Full-Stack Portal</span>
+        <input type="checkbox" class="calc-check" value="2500">
+      </div>
+      <div class="calc-option">
+        <span>Advanced Interactive UI/Animations</span>
+        <input type="checkbox" class="calc-check" value="600">
+      </div>
+
+      <div class="total-display">
+        Estimated Total: $<span id="total-price">0</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Billing Toggle Handler
+      const billingToggle = document.getElementById('billingToggle');
+      const pricePro = document.getElementById('price-pro');
+      const priceProPlus = document.getElementById('price-proplus');
+      const priceWhite = document.getElementById('price-white');
+
+      billingToggle.addEventListener('change', () => {
+        const isYearly = billingToggle.checked;
+        pricePro.innerHTML = isYearly ? "$1,199<span>/mo</span>" : "$1,499<span>/mo</span>";
+        priceProPlus.innerHTML = isYearly ? "$2,399<span>/mo</span>" : "$2,999<span>/mo</span>";
+        priceWhite.innerHTML = isYearly ? "$4,399<span>/mo</span>" : "$5,499<span>/mo</span>";
+      });
+
+      // Calculator Handler
+      const checkboxes = document.querySelectorAll('.calc-check');
+      const totalPriceDisplay = document.getElementById('total-price');
+
+      checkboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+          let total = 0;
+          checkboxes.forEach(box => {
+            if (box.checked) {
+              total += parseInt(box.value, 10);
+            }
+          });
+          totalPriceDisplay.innerText = total.toLocaleString();
+        });
+      });
+    });
+  </script>
+</body>
+</html>
