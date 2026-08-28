@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Apex Studio — Web Engineering & Memberships</title>
+  <title>Arnav Web Developers — Enterprise Web Solutions</title>
   <style>
     :root {
       --bg: #08090c;
@@ -37,7 +37,42 @@
       z-index: -1;
     }
 
-    .container { max-width: 1100px; margin: 0 auto; padding: 80px 20px; }
+    /* Navigation Bar */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8, 9, 12, 0.8);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+    }
+    .logo span { color: var(--accent-pro-plus); }
+    .nav-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .nav-btn:hover {
+      background: var(--card-bg);
+      border-color: var(--accent-pro-plus);
+    }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 60px 20px; }
 
     /* Header & Hero */
     header { text-align: center; margin-bottom: 60px; }
@@ -190,8 +225,54 @@
       text-align: right;
     }
 
+    /* Modal / Login Screen */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+    }
+    .login-card {
+      background: #12161f;
+      border: 1px solid var(--border);
+      padding: 40px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      position: relative;
+    }
+    .login-card h2 { margin-bottom: 10px; color: #fff; text-align: center; }
+    .login-card p { color: var(--text-muted); text-align: center; margin-bottom: 25px; font-size: 0.9rem; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; font-size: 0.85rem; color: var(--text-muted); }
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      background: #08090c;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1rem;
+    }
+    .form-group input:focus { outline: none; border-color: var(--accent-pro-plus); }
+    .close-btn {
+      position: absolute;
+      top: 15px; right: 20px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
     @media (max-width: 768px) {
       h1 { font-size: 2.3rem; }
+      nav { padding: 15px 20px; }
     }
   </style>
 </head>
@@ -199,9 +280,14 @@
 
   <div class="glow-bg"></div>
 
+  <nav>
+    <div class="logo">Arnav <span>Web Developers</span></div>
+    <button class="nav-btn" id="openLogin">Client Login</button>
+  </nav>
+
   <div class="container">
     <header>
-      <span class="badge">Next-Gen Web Engineering</span>
+      <span class="badge">Arnav Web Developers Engineering</span>
       <h1>Web Development Memberships</h1>
       <p>Subscribe to dedicated engineering power for your business. Unlimited revisions, constant updates, zero downtime.</p>
     </header>
@@ -229,7 +315,7 @@
             <li>Pause or cancel anytime</li>
           </ul>
         </div>
-        <button class="btn btn-pro">Subscribe to Pro</button>
+        <button class="btn btn-pro trigger-login">Subscribe to Pro</button>
       </div>
 
       <div class="price-card featured">
@@ -245,7 +331,7 @@
             <li>Dedicated Slack Channel Support</li>
           </ul>
         </div>
-        <button class="btn btn-pro-plus">Subscribe to Pro+</button>
+        <button class="btn btn-pro-plus trigger-login">Subscribe to Pro+</button>
       </div>
 
       <div class="price-card">
@@ -260,7 +346,7 @@
             <li>24/7 Dedicated Developer On-Call</li>
           </ul>
         </div>
-        <button class="btn btn-white">Subscribe to White</button>
+        <button class="btn btn-white trigger-login">Subscribe to White</button>
       </div>
 
     </div>
@@ -293,6 +379,26 @@
 
   </div>
 
+  <div class="modal-overlay" id="loginModal">
+    <div class="login-card">
+      <button class="close-btn" id="closeLogin">&times;</button>
+      <h2>Client Portal Login</h2>
+      <p>Enter your credentials to manage your Arnav Web Developers subscription</p>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="name@company.com" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-pro-plus">Log In to Dashboard</button>
+      </form>
+    </div>
+  </div>
+
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       // Billing Toggle Handler
@@ -322,6 +428,31 @@
           });
           totalPriceDisplay.innerText = total.toLocaleString();
         });
+      });
+
+      // Login Modal Controls
+      const loginModal = document.getElementById('loginModal');
+      const openLoginBtn = document.getElementById('openLogin');
+      const closeLoginBtn = document.getElementById('closeLogin');
+      const triggerLoginBtns = document.querySelectorAll('.trigger-login');
+      const loginForm = document.getElementById('loginForm');
+
+      const openModal = () => { loginModal.style.display = 'flex'; };
+      const closeModal = () => { loginModal.style.display = 'none'; };
+
+      openLoginBtn.addEventListener('click', openModal);
+      closeLoginBtn.addEventListener('click', closeModal);
+
+      triggerLoginBtns.forEach(btn => btn.addEventListener('click', openModal));
+
+      loginModal.addEventListener('click', (e) => {
+        if (e.target === loginModal) closeModal();
+      });
+
+      loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        alert('Welcome back to Arnav Web Developers Dashboard!');
+        closeModal();
       });
     });
   </script>
